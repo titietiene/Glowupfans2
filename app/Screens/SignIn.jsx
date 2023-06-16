@@ -15,6 +15,7 @@ const SignIn = () => {
     const [token, setToken] = useState("");
     const [loading, setLoading] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
+    const [googleLogin, setGoogleLogin] = useState(false);
     const [userLogin, setUserLogin] = useState({
         email: '',
         password: ''
@@ -33,22 +34,36 @@ const SignIn = () => {
         if (response?.type === "success") {
             setToken(response.authentication.accessToken);
             getUserInfo(response.authentication.accessToken);
+        } else {
+            setGoogleLogin(false);
         }
     }, [response, token]);
 
     const getUserInfo = async (myToken) => {
         console.log(myToken, 'myToken');
         try {
-            const response = await fetch(
-                "https://www.googleapis.com/userinfo/v2/me",
-                {
-                    headers: { Authorization: `Bearer ${myToken}` },
-                }
-            );
+            const response = await API.post('auth/google', JSON.stringify({ "access_token": myToken }));
+            if (response.data) {
+                console.log(response.data, 'response');
+                setGoogleLogin(false);
+                storeData(storageConstants.PROFILE_DATA, JSON.stringify(response.data));
+                storeData(storageConstants.ACCESS_TOKEN, response.data.token);
+                navReset('DrawerApp');
+            } else {
+                setGoogleLogin(false);
+            }
+            // const response = await fetch(
+            //     "https://www.googleapis.com/userinfo/v2/me",
+            //     {
+            //         headers: { Authorization: `Bearer ${myToken}` },
+            //     }
+            // );
 
-            const user = await response.json();
-            setUserInfo(user);
+            // const user = await response.json();
+            // console.log(user, 'user');
+            // setUserInfo(user);
         } catch (error) {
+            setGoogleLogin(false);
             console.log(error, 'gooogle error');
             // Add your own error handler here
         }
@@ -145,12 +160,18 @@ const SignIn = () => {
                         </ActionButton>
                         <Separator />
                         <ActionButton
-                            disabled={!request}
+                            disabled={googleLogin}
                             onPress={() => {
+                                setGoogleLogin(true);
                                 promptAsync();
                             }}
                             customStyles={{ backgroundColor: '#ee7271', height: 50, marginTop: 0 }}>
-                            <Text style={{ color: '#ffffff', fontFamily: 'RCRegular', fontSize: 18 }}>Connect with Google</Text>
+                            {
+                                googleLogin ?
+                                    <ActivityIndicator size="small" color="#ffffff" />
+                                    :
+                                    <Text style={{ color: '#ffffff', fontFamily: 'RCRegular', fontSize: 18 }}>Connect with Google</Text>
+                            }
                         </ActionButton>
                         <ActionButton customStyles={{ backgroundColor: '#3b5998', height: 50, marginTop: 20 }}>
                             <Text style={{ color: '#ffffff', fontFamily: 'RCRegular', fontSize: 18 }}>Connect with Facebook</Text>
