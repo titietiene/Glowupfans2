@@ -28,6 +28,7 @@ const SignIn = () => {
     const [request, response, promptAsync] = Google.useAuthRequest({
         androidClientId: "459682868428-6jonn2n1s5ml83hn0acrl1rl0ohe6hdl.apps.googleusercontent.com",
         webClientId: "459682868428-fa0ecn9281edamqobior7528b5rlgcqq.apps.googleusercontent.com",
+        iosClientId: "459682868428-qrrveiv4jig2eeidovfc9e13t0vmquce.apps.googleusercontent.com"
     });
 
     useEffect(() => {
